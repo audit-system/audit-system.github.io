@@ -7,10 +7,10 @@
 //define('DB_NAME', 'lpa_db');
 //define('DB_USER', 'root');
 //define('DB_PASS', '');          // XAMPP = vide par défaut
-define('DB_HOST', 'sql111.infinityfree.com');
-define('DB_NAME', 'if0_41408771_lpa_db');
-define('DB_USER', 'if0_41408771');
-define('DB_PASS', '12CHAKIR');          // XAMPP = vide par défaut
+define('DB_HOST', 'sql.freedb.tech');
+define('DB_NAME', 'freedb_audit_db');
+define('DB_USER', 'freedb_auditdb_user');
+define('DB_PASS', 'avvZVJ@Ab2F3na&');          // XAMPP = vide par défaut
 
 function db() {
     static $pdo = null;
