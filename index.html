@@ -357,6 +357,30 @@ tbody tr:hover td { background: #ffffff03; }
 
 <script>
 /* ═══════════════════════════════════════════
+   Helper function
+═══════════════════════════════════════════ */
+  async function api(url, data = {}, method = 'POST') {
+  const options = {
+    method,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  };
+
+  if (method !== 'GET') {
+    options.body = new URLSearchParams(data);
+  }
+
+  const res = await fetch(url, options);
+
+  // Optional: handle HTTP errors
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}`);
+  }
+
+  return res.json();
+}
+/* ═══════════════════════════════════════════
    QUESTIONS PAR NIVEAU
 ═══════════════════════════════════════════ */
 const QS = {
@@ -440,7 +464,7 @@ const fd  = s => s ? (s+'').split('T')[0].split(' ')[0] : '—';
 ═══════════════════════════════════════════ */
 document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
-async function doLogin() {
+/*async function doLogin() {
   $('lerr').classList.add('hide');
   try {
     const r = await fetch('login.php', {
@@ -456,7 +480,26 @@ async function doLogin() {
     await boot();
   } catch { $('lerr').classList.remove('hide'); }
 }
+ */
+  async function doLogin() {
+  $('lerr').classList.add('hide');
+  try {
+    const d = await api('login.php', {
+      username: $('lu').value.trim(),
+      password: $('lp').value
+    });
 
+    if (!d.ok) throw 0;
+
+    USER = d.user;
+    $('loginPage').style.display = 'none';
+    $('appPage').style.display   = 'block';
+    await boot();
+
+  } catch {
+    $('lerr').classList.remove('hide');
+  }
+}
 async function doLogout() {
   await fetch('login.php?logout=1');
   USER = null; ROWS = [];
@@ -749,12 +792,16 @@ async function submitForm() {
   btn.disabled = true; btn.textContent = 'Enregistrement…';
 
   try {
-    const r = await fetch('save.php', {
+    /*const r = await fetch('save.php', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify(payload)
     });
-    const d = await r.json();
+    const d = await r.json();*/
+    const d = await api('save.php', {
+    payload: JSON.stringify(payload)  
+    });
+    
     if (!d.ok) throw new Error(d.err || 'Erreur serveur');
     await loadData();
     toast(`✅ Enregistré — Score : ${score}%`, 'ok');
@@ -807,12 +854,16 @@ async function saveNom() {
   const nom = $('pNomNew').value.trim();
   if (!nom) { toast('Entrez un nom', 'err'); return; }
   try {
-    const r = await fetch('profile.php', {
+    /*const r = await fetch('profile.php', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ action: 'rename', nom })
     });
-    const d = await r.json();
+    const d = await r.json();*/
+    const d = await api('profile.php', {
+    action: 'rename',
+    nom
+    });
     if (!d.ok) throw new Error(d.err);
     USER.nom = d.nom;
     $('uname').textContent  = USER.nom;
@@ -831,12 +882,17 @@ async function savePasswd() {
   if (nw !== conf) { toast('Les mots de passe ne correspondent pas', 'err'); return; }
   if (nw.length < 6) { toast('Minimum 6 caractères', 'err'); return; }
   try {
-    const r = await fetch('profile.php', {
+    /*const r = await fetch('profile.php', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ action: 'passwd', old, new: nw })
     });
-    const d = await r.json();
+    const d = await r.json();*/
+    const d = await api('profile.php', {
+  action: 'passwd',
+  old,
+  new: nw
+});
     if (!d.ok) throw new Error(d.err);
     $('pOldPwd').value = $('pNewPwd').value = $('pConfPwd').value = '';
     toast('✅ Mot de passe changé', 'ok');
